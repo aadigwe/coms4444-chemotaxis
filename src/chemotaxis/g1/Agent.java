@@ -3,6 +3,7 @@ package chemotaxis.g1; // TODO modify the package name to reflect your team
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
 
 import chemotaxis.sim.DirectionType;
 import chemotaxis.sim.ChemicalCell;
@@ -37,6 +38,17 @@ public class Agent extends chemotaxis.sim.Agent {
     @Override
     public Move makeMove(Integer randomNum, Byte previousState, ChemicalCell currentCell,
             Map<DirectionType, ChemicalCell> neighborMap) {
+        /*
+        0 chemicals yet:
+        Not sure we should include this yet
+        if(!anyChemicalOnMap(neighborMap)){
+            System.out.println("Kicking in default behavior");
+            Move agentMove = defaultMove(randomNum, previousState, currentCell, neighborMap);
+            return agentMove;
+        }
+        */
+        
+        
         Move agentMove = new Move();
         DirectionType dir = getBlueDirection(neighborMap, 0.99);
         DirectionType[] dir2 = getRedDirection(neighborMap, 0.2);
@@ -77,6 +89,82 @@ public class Agent extends chemotaxis.sim.Agent {
             agentMove.currentState = getDirectionByte(agentMove.directionType);
         }
         return agentMove;
+        
+    }
+
+    private Move defaultMove(Integer randomNum, Byte previousState, ChemicalCell currentCell,
+            Map<DirectionType, ChemicalCell> neighborMap){
+            
+            Move defMove = new Move();
+            ArrayList<DirectionType> availCells = openCells(currentCell, neighborMap);
+
+            if(getDirectionFromByte(previousState) == DirectionType.CURRENT){
+                defMove.directionType = DirectionType.EAST;
+                defMove.currentState = getDirectionByte(defMove.directionType);
+                return defMove;
+            }
+            if (availCells.size() == 1) {
+                System.out.println("CASE 1");
+                defMove.directionType = availCells.get(0);
+                defMove.currentState = previousState;
+                return defMove;
+            }
+            //Continue in same direction
+            if (availCells.contains(getDirectionFromByte(previousState))) {
+                //System.out.println("CASE 2" + availCells);
+                //Integer rnum = Math.abs(randomNum%availCells.size());
+                //defMove.directionType = availCells.get(rnum);
+                //defMove.currentState = getDirectionByte(availCells.get(rnum));
+                defMove.directionType = getDirectionFromByte(previousState);
+                defMove.currentState = previousState;
+                return defMove;
+            }
+            //Removes opposite of previous direction and goes in a random open cell
+            if (availCells.contains(getOppositeDirection(getDirectionFromByte(previousState)))) {
+                //System.out.println("CASE 3");
+                availCells.remove(getOppositeDirection(getDirectionFromByte(previousState)));
+                Integer rnum = Math.abs(randomNum%availCells.size());
+                defMove.directionType = availCells.get(rnum);
+                defMove.currentState = getDirectionByte(availCells.get(rnum));
+                return defMove;
+            }
+            return defMove;  
+    }
+
+    private ArrayList<DirectionType> openCells(ChemicalCell currentCell, Map<DirectionType, ChemicalCell> neighborMap){
+        ArrayList<DirectionType> availCells = new ArrayList<>();
+        for (Map.Entry<DirectionType, ChemicalCell> neighbor: neighborMap.entrySet()) {
+            if (neighbor.getValue().isOpen()) {
+                availCells.add(neighbor.getKey());
+            }
+        }
+        return availCells;
+    }
+
+    private DirectionType getOppositeDirection(DirectionType currDir){
+        if(currDir.equals(DirectionType.EAST)){
+            return DirectionType.WEST;
+        } else if (currDir.equals(DirectionType.WEST)){
+            return DirectionType.EAST;
+        } else if (currDir.equals(DirectionType.NORTH)){
+            return DirectionType.SOUTH;
+        } else {
+            return DirectionType.NORTH;
+        }
+    }
+
+    private Boolean anyChemicalOnMap(Map<DirectionType, ChemicalCell> neighborMap){
+        //Modification of Group2's filterColorMap
+        for (Map.Entry<DirectionType, ChemicalCell> cellEntry: neighborMap.entrySet()) {
+            ChemicalCell cell = cellEntry.getValue();
+            Map<ChemicalCell.ChemicalType, Double> concentrations = cell.getConcentrations();
+            for (Map.Entry<ChemicalCell.ChemicalType, Double> conc: concentrations.entrySet()) {
+                if (conc.getValue() >= 0.0001) {
+                    return true;   
+            }
+        }
+    }
+    return false;
     }
 
     private DirectionType getRandomDirection(DirectionType prev, Integer random) {
@@ -113,7 +201,7 @@ public class Agent extends chemotaxis.sim.Agent {
         return absoluteGreen;
     }
 
-    private DirectionType getRedDirection(Map<DirectionType, ChemicalCell> neighborMap, Double redThreshold) {
+    private DirectionType[] getRedDirection(Map<DirectionType, ChemicalCell> neighborMap, Double redThreshold) {
         Map<DirectionType, Map<ChemicalCell.ChemicalType, Double>> concentrationMap = getConcentrations(neighborMap);
         DirectionType[] absoluteRed = { DirectionType.CURRENT, DirectionType.CURRENT };
 

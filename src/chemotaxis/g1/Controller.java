@@ -58,6 +58,7 @@ public class Controller extends chemotaxis.sim.Controller {
     @Override
     public ChemicalPlacement applyChemicals(Integer currentTurn, Integer chemicalsRemaining, Point currentLocation,
             ChemicalCell[][] grid) {
+
         if (currentTurn == 1) {
             this.totalChemicals = chemicalsRemaining;
             this.myAllKPaths = getAllPathsFromTarget(grid, this.totalChemicals);
@@ -222,8 +223,8 @@ public class Controller extends chemotaxis.sim.Controller {
         List<Point> p1 = new ArrayList<>(original);
         List<Point> p2 = new ArrayList<>(new_path);
 
-        System.out.println("ORIGINAL: " + p1 + "\n");
-        System.out.println("NEW: " +p2 + "\n");
+        //System.out.println("ORIGINAL: " + p1 + "\n");
+        //System.out.println("NEW: " +p2 + "\n");
         if (!p1.isEmpty() && !p2.isEmpty()) {
             Set<Point> set1 = new LinkedHashSet<>(p1);
             Set<Point> set2 = new LinkedHashSet<>(p2);
@@ -263,6 +264,22 @@ public class Controller extends chemotaxis.sim.Controller {
 //            }
         }
         return true;
+    }
+
+    private String MapType(ChemicalCell[][] grid){
+        String maptype = "sparse";
+        Integer count = 0;
+        for(int i=0; i<grid[0].length; i++) {
+            for(int j=0; j<grid[1].length; j++) {
+                if(grid[i][j].isBlocked()){
+                    count +=1;
+                }
+            }
+        }
+        if(count > (grid[0].length * grid[1].length)/4){
+            maptype = "dense";
+        }
+        return maptype;
     }
 
     private List<Point> getTurns(List<Point> path) {
