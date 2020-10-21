@@ -40,7 +40,7 @@ public class Agent extends chemotaxis.sim.Agent {
             Map<DirectionType, ChemicalCell> neighborMap) {
         
         /*
-        //0 chemicals :
+        //0 chemicals default behavior:
         //Not sure we should include this yet
         if(previousState == 0 && (getDirectionByte(getBlueDirection(neighborMap, 0.99)) == 0 )){
             System.out.println("Kicking in default behavior");
