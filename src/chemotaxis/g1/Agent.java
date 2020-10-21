@@ -38,15 +38,17 @@ public class Agent extends chemotaxis.sim.Agent {
     @Override
     public Move makeMove(Integer randomNum, Byte previousState, ChemicalCell currentCell,
             Map<DirectionType, ChemicalCell> neighborMap) {
+        
         /*
-        0 chemicals yet:
-        Not sure we should include this yet
-        if(!anyChemicalOnMap(neighborMap)){
+        //0 chemicals :
+        //Not sure we should include this yet
+        if(previousState == 0 && (getDirectionByte(getBlueDirection(neighborMap, 0.99)) == 0 )){
             System.out.println("Kicking in default behavior");
             Move agentMove = defaultMove(randomNum, previousState, currentCell, neighborMap);
             return agentMove;
         }
         */
+        
         
         
         Move agentMove = new Move();
